@@ -1,0 +1,7 @@
+.ropeproject
+*.class
+*.log
+build/
+.idea/
+.vscode/
+.DS_Store
