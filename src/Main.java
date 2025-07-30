@@ -37,10 +37,8 @@ public class Main {
                 server,
                 "/tickets",
                 Map.of(
-                    "POST",
-                    () -> ticketController.enqueue(0),
-                    "GET",
-                    () -> ticketController.dequeue()
+                    "POST", () -> ticketController.enqueue(0),
+                    "GET", () -> ticketController.dequeue()
                 )
             );
 
@@ -64,11 +62,10 @@ public class Main {
 
             server.start();
             System.out.println("Server started successfully");
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     public static <T> void addRoute(
@@ -78,34 +75,35 @@ public class Main {
     ) throws Exception {
         server.createContext(path, exchange -> {
             String requestMethod = exchange.getRequestMethod();
-            methodHandling.forEach((key, value) -> {
-                String response = "{}";
+
+            if (methodHandling.containsKey(requestMethod)) {
                 try {
-                    if (key.equalsIgnoreCase(requestMethod)) {
-                        HttpResponseHandler resp = methodHandling
-                            .get(key)
-                            .call();
+                    HttpResponseHandler resp = methodHandling.get(requestMethod).call();
+                    String response = resp.getContent();
+                    byte[] responseBytes = response.getBytes();
 
-                        response = resp.getContent();
-
-                        exchange.sendResponseHeaders(
-                            resp.getStatusCode(),
-                            resp.getSize()
-                        );
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(response.getBytes());
-                        os.close();
-                        return;
-                    }
+                    exchange.sendResponseHeaders(resp.getStatusCode(), responseBytes.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(responseBytes);
+                    os.close();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    String error = "Internal Server Error";
+                    byte[] errorBytes = error.getBytes();
+                    exchange.sendResponseHeaders(500, errorBytes.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(errorBytes);
+                    os.close();
                 }
-            });
-
-            exchange.sendResponseHeaders(500, 0);
-            OutputStream os = exchange.getResponseBody();
-            os.write("".getBytes());
-            os.close();
+            } else {
+                String notAllowed = "Method Not Allowed";
+                byte[] notAllowedBytes = notAllowed.getBytes();
+                exchange.sendResponseHeaders(405, notAllowedBytes.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(notAllowedBytes);
+                os.close();
+            }
         });
     }
 }
+
