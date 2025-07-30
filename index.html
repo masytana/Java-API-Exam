@@ -1,0 +1,35 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion de Ticket</title>
+</head>
+<body>
+  <h1>Gestion de file d’attente</h1>
+
+  <button onclick="enqueue()">Créer un Ticket</button>
+  <button onclick="dequeue()">Servir un Ticket</button>
+  <button onclick="peek()">Voir le prochain</button>
+  <button onclick="checkEmpty()">Fichier vide ?</button>
+  <button onclick="checkSize()">Taille</button>
+
+  <pre id="result"></pre>
+
+  <script>
+    const baseUrl = "https://daniella-java-api-exam.onrender.com";
+
+    async function fetchAPI(path, method = "GET") {
+      const res = await fetch(`${baseUrl}${path}`, { method });
+      const text = await res.text();
+      document.getElementById("result").textContent = text;
+    }
+
+    function enqueue() { fetchAPI("/tickets", "POST"); }
+    function dequeue() { fetchAPI("/tickets"); }
+    function peek()    { fetchAPI("/tickets/peek"); }
+    function checkEmpty() { fetchAPI("/tickets/empty"); }
+    function checkSize()  { fetchAPI("/tickets/size"); }
+  </script>
+</body>
+</html>

@@ -2,6 +2,8 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -16,6 +18,20 @@ public class Main {
             );
 
             TicketController ticketController = new TicketController();
+
+            addRoute(
+                server,
+                "/",
+                Map.of("GET", () -> {
+                    try {
+                        String html = Files.readString(Paths.get("index.html"));
+                        return new HttpResponseHandler(200, html.length(), html);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return new HttpResponseHandler(500, 0, "Erreur lors de la lecture du fichier HTML.");
+                    }
+                })
+            );
 
             addRoute(
                 server,
