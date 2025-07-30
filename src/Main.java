@@ -13,7 +13,7 @@ public class Main {
         try {
             System.out.println("Starting server at http://127.0.0.1:8000");
             HttpServer server = HttpServer.create(
-                new InetSocketAddress(8000),
+                new InetSocketAddress("0.0.0.0", 8000),
                 0
             );
 
